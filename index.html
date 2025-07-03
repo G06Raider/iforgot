@@ -125,20 +125,70 @@
             opacity: 0.3;
         }
 
+    .navbar {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        transform: none;
+        background: var(--glass-medium);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        border-radius: 60px;
+        padding: 0.8rem 1.5rem;
+        z-index: 1000;
+        transition: var(--transition);
+        box-shadow: var(--shadow-glass);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .nav-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
         .navbar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--glass-medium);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 60px;
-            padding: 0.8rem 2rem;
-            z-index: 1000;
-            transition: var(--transition);
-            box-shadow: var(--shadow-glass);
+            padding: 0.6rem 1.2rem;
         }
+        
+        .nav-logo {
+            font-size: 1.2rem;
+            gap: 0.6rem;
+        }
+        
+        .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+        
+        .nav-cta {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .nav-logo-text {
+            display: none;
+        }
+        
+        .nav-actions {
+            gap: 0.5rem;
+        }
+    }
 
         .navbar:hover {
             background: var(--glass-strong);
@@ -1004,8 +1054,8 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="nav-logo">
-<div class="nav-logo-icon">
-  <img src="icon.ico" alt="G6 Logo" style="width: 32px; height: 32px;">
+                <div class="nav-logo-icon">
+  <img src="icon.ico" alt="Go6 Logo" style="width: 32px; height: 32px;">
 </div>
 
                 <span class="nav-logo-text">Go6 Raider</span>
@@ -1026,7 +1076,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="hero-container">
             <div class="hero-badge">
