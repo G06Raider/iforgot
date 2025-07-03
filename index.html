@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go6 Raider - Advanced Open Source Security Tool</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f1a;
+            --bg-tertiary: #16162a;
+            --glass-light: rgba(255, 255, 255, 0.03);
+            --glass-medium: rgba(255, 255, 255, 0.06);
+            --glass-strong: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00f5ff;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-orange: #f97316;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+            --text-dim: rgba(255, 255, 255, 0.45);
+            --glow-cyan: rgba(0, 245, 255, 0.4);
+            --glow-purple: rgba(139, 92, 246, 0.4);
+            --glow-pink: rgba(236, 72, 153, 0.4);
+            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-strong: 0 20px 64px rgba(0, 0, 0, 0.5);
+            --border-radius: 20px;
+            --border-radius-xl: 32px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.7;
+        }
+
+        .bg-orbs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            animation: float-orb 25s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--accent-cyan), transparent 70%);
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--accent-purple), transparent 70%);
+            top: 50%;
+            right: 10%;
+            animation-delay: -8s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--accent-pink), transparent 70%);
+            bottom: 20%;
+            left: 50%;
+            animation-delay: -16s;
+        }
+
+        @keyframes float-orb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(60px, -80px) scale(1.1); }
+            50% { transform: translate(-40px, 60px) scale(0.9); }
+            75% { transform: translate(80px, 40px) scale(1.05); }
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--glow-cyan), transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(150px);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.5s ease;
+            opacity: 0.3;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-medium);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 60px;
+            padding: 0.8rem 2rem;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .navbar:hover {
+            background: var(--glass-strong);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 800;
+            font-size: 1.4rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 20px var(--glow-cyan);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-logo-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            animation: logo-shine 4s infinite;
+        }
+
+        @keyframes logo-shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .nav-logo-text {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.8rem 1.2rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-item a:hover {
+            color: var(--text-primary);
+            background: var(--glass-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-item a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            transition: all 0.3s ease;
+        }
+
+        .nav-item a:hover::after {
+            width: 70%;
+            left: 15%;
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)) !important;
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 4px 20px var(--glow-cyan);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px var(--glow-cyan);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .hero-badge:hover {
+            background: var(--glass-medium);
+            transform: translateY(-2px);
+        }
+
+        .hero-badge i {
+            color: var(--accent-cyan);
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            position: relative;
+        }
+
+        .hero-title-main {
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 80px var(--glow-cyan);
+        }
+
+        .hero-title-accent {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            color: transparent;
+            display: block;
+            position: relative;
+            animation: gradient-shift 8s ease-in-out infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(45deg); }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 4rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            box-shadow: 0 8px 32px var(--glow-cyan);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 48px var(--glow-cyan);
+        }
+
+        .btn-secondary {
+            background: var(--glass-medium);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-strong);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .hero-stat:hover {
+            background: var(--glass-medium);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .hero-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .features {
+            padding: 8rem 2rem;
+            background: linear-gradient(180deg, transparent, var(--bg-secondary), transparent);
+            position: relative;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: var(--glass-light);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-xl);
+            padding: 3rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            transform: scaleX(0);
+            transition: transform 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            background: var(--glass-medium);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px var(--glow-cyan);
+            position: relative;
+        }
+
+        .feature-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon::after {
+            opacity: 0.3;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.05); opacity: 0.6; }
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .why-us {
+            padding: 8rem 2rem;
+            background: linear-gradient(180deg, transparent, var(--bg-tertiary), transparent);
+            position: relative;
+        }
+
+        .why-us-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .why-us-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .why-us-card {
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-xl);
+            padding: 3rem 2.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .why-us-card:hover {
+            background: var(--glass-medium);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .why-us-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .why-us-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .why-us-description {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        .download {
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .download-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .download-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .download-card {
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-xl);
+            padding: 3rem 2rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .download-card:hover {
+            background: var(--glass-medium);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glass);
+        }
+
+        .download-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-cyan);
+        }
+
+        .download-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .download-description {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .disclaimer {
+            padding: 8rem 2rem;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .disclaimer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-xl);
+            padding: 4rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .disclaimer-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .disclaimer-content {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .disclaimer-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .cta {
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--glass-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-xl);
+            padding: 4rem;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--glow-cyan), transparent, var(--glow-purple), transparent);
+            animation: rotate-gradient 15s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes rotate-gradient {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--glass-border);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--accent-cyan);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 2rem;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 1200px) {
+            .nav-container {
+                gap: 2rem;
+            }
+            
+            .nav-menu {
+                gap: 1.5rem;
+            }
+            
+            .hero-title {
+                font-size: clamp(2.5rem, 7vw, 5rem);
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar {
+                left: 20px;
+                right: 20px;
+                transform: none;
+                padding: 0.6rem 1.5rem;
+            }
+
+            .nav-container {
+                gap: 1.5rem;
+            }
+
+            .nav-menu {
+                gap: 1rem;
+            }
+
+            .hero {
+                padding: 6rem 1rem 3rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid, .why-us-grid, .download-options {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card, .why-us-card, .download-card {
+                padding: 2.5rem;
+            }
+
+            .cta-container, .disclaimer-container {
+                padding: 3rem 2rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section-title {
+                font-size: clamp(2rem, 5vw, 3rem);
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 3.5rem);
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 0.8rem 1.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .feature-card, .why-us-card, .download-card {
+                padding: 2rem;
+            }
+            
+            .disclaimer-container {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 2rem;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-strong);
+                transform: translateY(-150%);
+                transition: transform 0.4s ease;
+                z-index: 999;
+            }
+            
+            .nav-menu.active {
+                transform: translateY(0);
+            }
+            
+            .nav-item {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .nav-item a {
+                display: block;
+                padding: 1rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--accent-cyan), var(--accent-purple));
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(var(--accent-purple), var(--accent-pink));
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-canvas">
+        <div class="bg-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+    </div>
+
+    <div class="cursor-trail" id="cursorTrail"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon">G6</div>
+                <span class="nav-logo-text">Go6 Raider</span>
+            </a>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item"><a href="#home">Home</a></li>
+                <li class="nav-item"><a href="#features">Features</a></li>
+                <li class="nav-item"><a href="#why-us">Why Us?</a></li>
+                <li class="nav-item"><a href="#download">Download</a></li>
+                <li class="nav-item"><a href="#disclaimer">Disclaimer</a></li>
+                <li class="nav-item"><a href="#" class="nav-cta">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <i class="fas fa-rocket"></i>
+                <span>Open Source Discord Raid Tool</span>
+            </div>
+            
+            <h1 class="hero-title">
+                <span class="hero-title-main">Go6</span>
+                <span class="hero-title-accent">Raiding Redefined</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Go6 Raider is the ultimate open-source raid tool for discord.
+                We offer a high quality discord raider for 0$
+            </p>
+            
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">
+                    <i class="fas fa-download"></i>
+                    Download Free
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    <i class="fab fa-github"></i>
+                    View on GitHub
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number">?K+</div>
+                    <div class="hero-stat-label">Downloads</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number" id="githubStars">Loading...</div>
+                    <div class="hero-stat-label">GitHub Stars</div>
+                </div>
+
+                <div class="hero-stat">
+                    <div class="hero-stat-number">99.9%</div>
+                    <div class="hero-stat-label">Reliability</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="features-container">
+    <div class="section-header">
+      <div class="section-badge">Why Use Go6 Raider</div>
+      <h2 class="section-title">Straight to the Point</h2>
+      <p class="section-subtitle">
+        Just a solid tool that does what it’s supposed to. Free, open source, and built to push the standard higher.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+        <h3 class="feature-title">Totally Free</h3>
+        <p class="feature-description">
+          No premium version, no hidden fees. Just one version — the full one — and it’s yours. Forever.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-code"></i>
+        </div>
+        <h3 class="feature-title">Open Source</h3>
+        <p class="feature-description">
+          Full source code is public. Fork it, build on it, break it, whatever. Just drop credits if you skid it.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-unlock"></i>
+        </div>
+        <h3 class="feature-title">Bypass Machine</h3>
+        <p class="feature-description">
+          Loaded with bypasses. New ones pop in all the time. It’s built to actually work, not just look pretty.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <h3 class="feature-title">Feature Packed</h3>
+        <p class="feature-description">
+          Tool’s got a ton going on inside. Not just a spammer — full stack of tools that actually do stuff.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-smile"></i>
+        </div>
+        <h3 class="feature-title">Beginner Friendly</h3>
+        <p class="feature-description">
+          Built so anyone can jump in and use it. No weird setup. Just open and go.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-network-wired"></i>
+        </div>
+        <h3 class="feature-title">Proxy Support</h3>
+        <p class="feature-description">
+          Supports proxies out the box. Rotate them, stack them, whatever — you’re covered.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <h3 class="feature-title">Fast Spammer</h3>
+        <p class="feature-description">
+          Spam system’s quick. Handles a ton of placeholders, messages, pings — it’s built for speed.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <h3 class="feature-title">Always Updated</h3>
+        <p class="feature-description">
+          It stays up to date. New stuff, fixes, bypasses — all rolling in constantly.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-fire"></i>
+        </div>
+        <h3 class="feature-title">Raising the Bar</h3>
+        <p class="feature-description">
+          Made to set a new minimum for raid tools. If it doesn’t meet this level, it’s outdated.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Us Section -->
+<section class="why-us" id="why-us">
+  <div class="why-us-container">
+    <div class="section-header">
+      <div class="section-badge">The Go6 Raider Difference</div>
+      <h2 class="section-title">Why Rock With Us?</h2>
+      <p class="section-subtitle">
+        We’re not here to upsell you or waste your time. We just built something good — and here’s why it actually hits different.
+      </p>
+    </div>
+
+    <div class="why-us-grid">
+      <div class="why-us-card">
+        <div class="why-us-number">01</div>
+        <h3 class="why-us-title">Always Free</h3>
+        <p class="why-us-description">
+          100% free. No paywalls. No “pro” versions. Just grab it and use it — all of it.
+        </p>
+      </div>
+
+      <div class="why-us-card">
+        <div class="why-us-number">02</div>
+        <h3 class="why-us-title">Community First</h3>
+        <p class="why-us-description">
+          We actually listen. Got an idea or something that’s not working right? Drop it in — we take feedback seriously.
+        </p>
+      </div>
+
+      <div class="why-us-card">
+        <div class="why-us-number">03</div>
+        <h3 class="why-us-title">No Half Measures</h3>
+        <p class="why-us-description">
+          Just 'cause it’s free doesn’t mean it’s mid. Tool’s built to perform like premium — and better.
+        </p>
+      </div>
+
+      <div class="why-us-card">
+        <div class="why-us-number">04</div>
+        <h3 class="why-us-title">Real Support</h3>
+        <p class="why-us-description">
+          Our Discord server’s got active support. Ask, suggest, or just chill — we’re around.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Download Section -->
+<section class="download" id="download">
+    <div class="download-container">
+        <div class="section-header">
+            <div class="section-badge">Get Started</div>
+            <h2 class="section-title">Download Go6 Raider</h2>
+            <p class="section-subtitle">
+                Officially supported on Windows only. Other platforms may work but are not maintained.
+            </p>
+        </div>
+        
+        <div class="download-options">
+            <div class="download-card">
+                <div class="download-icon">
+                    <i class="fab fa-windows"></i>
+                </div>
+                <h3 class="download-title">Windows</h3>
+                <p class="download-description">
+                    Fully compatible with Windows 10/11.
+                </p>
+                <a href="#download" class="btn btn-primary">
+                    <i class="fas fa-download"></i>
+                    Download (.exe)
+                </a>
+            </div>
+            
+            <div class="download-card not-supported">
+                <div class="download-icon">
+                    <i class="fab fa-apple"></i>
+                </div>
+                <h3 class="download-title">macOS</h3>
+                <p class="download-description">
+                    Not officially supported.
+                </p>
+                <div class="btn btn-secondary not-supported-btn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Not Supported
+                </div>
+            </div>
+            
+            <div class="download-card not-supported">
+                <div class="download-icon">
+                    <i class="fab fa-linux"></i>
+                </div>
+                <h3 class="download-title">Linux</h3>
+                <p class="download-description">
+                    Not officially supported.
+                </p>
+                <div class="btn btn-secondary not-supported-btn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Not Supported
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .download-card.not-supported {
+        opacity: 0.7;
+        position: relative;
+    }
+    
+    .download-card.not-supported::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            135deg, 
+            rgba(10, 10, 15, 0.7), 
+            rgba(15, 15, 26, 0.8)
+        );
+        z-index: 1;
+        border-radius: inherit;
+    }
+    
+    .not-supported .download-icon,
+    .not-supported .download-title,
+    .not-supported .download-description {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .not-supported-btn {
+        position: relative;
+        z-index: 2;
+        cursor: not-allowed;
+        background: var(--glass-medium) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: var(--text-muted) !important;
+    }
+    
+    .not-supported-btn i {
+        color: var(--accent-orange) !important;
+    }
+    
+    .not-supported .download-icon {
+        color: var(--text-dim) !important;
+    }
+</style>
+
+    <!-- Disclaimer Section -->
+    <section class="disclaimer" id="disclaimer">
+        <div class="disclaimer-container">
+            <h2 class="disclaimer-title">About the Development Process</h2>
+            <div class="disclaimer-content">
+                <p>
+                    This project is 100% open source, and I want to be open about how it was made:
+                </p>
+                
+                <p>
+                    Some parts were created with help from AI, but not because I had to — I already had working code from earlier projects. I used AI to help adjust these parts for this project, which saved me a lot of time.
+                </p>
+                
+                <p>
+                    When I switched to pywebview, many functions needed changes to work properly. Instead of rewriting everything by hand, I used AI to handle the repetitive parts so I could focus on the main work and make sure everything fit together well.
+                </p>
+                
+                <p>
+                    I have carefully checked every part of the code, and I take full responsibility for how the final version works. Some parts of the UI also use AI-generated elements to keep things looking consistent, which saved me from doing a lot of small, manual changes.
+                </p>
+                
+                <p>
+                    This is a free tool that I'm building in my free time. If you find any problems, feel free to DM me (.gekkefries1) — I really appreciate any feedback!
+                </p>
+            </div>
+        </div>
+    </section>
+
+<section class="cta">
+  <div class="cta-container">
+    <div class="cta-content">
+      <h2 class="cta-title">Ready to Use Go6 Raider?</h2>
+      <p class="cta-subtitle">
+        No limits. No paywalls. Just a fully-loaded, open-source raid tool built to go hard — fast spammer, proxy support, tons of features, and always up to date.
+      </p>
+      <a href="#download" class="btn btn-primary">
+        <i class="fas fa-download"></i>
+        Get It Now – It’s Free
+      </a>
+    </div>
+  </div>
+</section>
+
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Socials</h3>
+                    <div class="social-links">
+                        <a href="https://discord.gg/XJHUaQPT24" target="_blank" title="Join our Discord Server">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="https://discordapp.com/users/1147540007171670077" target="_blank" title="Contact me on Discord">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Go6 Raider. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('mousemove', function(e) {
+            const cursorTrail = document.getElementById('cursorTrail');
+            cursorTrail.style.left = e.pageX + 'px';
+            cursorTrail.style.top = e.pageY + 'px';
+        });
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const offset = 100;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'var(--glass-strong)';
+                navbar.style.boxShadow = 'var(--shadow-strong)';
+            } else {
+                navbar.style.background = 'var(--glass-medium)';
+                navbar.style.boxShadow = 'var(--shadow-glass)';
+            }
+        });
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            this.innerHTML = navMenu.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+        document.querySelectorAll('.nav-item a').forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    navMenu.classList.remove('active');
+                    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            });
+        });
+
+
+        async function fetchGitHubStars() {
+            try {
+                const response = await fetch('https://api.github.com/repos/midlucks/discord-invite-scraper');
+                const data = await response.json();
+                
+                if (data.stargazers_count) {
+                    const starsElement = document.getElementById('githubStars');
+                    // Format number with K for thousands
+                    const starsCount = data.stargazers_count > 1000 
+                        ? `${(data.stargazers_count / 1000).toFixed(1)}K` 
+                        : data.stargazers_count;
+                    starsElement.textContent = starsCount;
+                }
+            } catch (error) {
+                console.error('Error fetching GitHub stars:', error);
+                document.getElementById('githubStars').textContent = '...K';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', fetchGitHubStars);
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+<div class="download-overlay" id="downloadOverlay">
+  <div class="overlay-content">
+    <div class="overlay-header">
+      <h2>Download Requirements</h2>
+      <button class="close-overlay" id="closeOverlay">&times;</button>
+    </div>
+    
+    <div class="overlay-body">
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <h3>Python Installation</h3>
+          </div>
+          <div class="step-content">
+            <p>Before downloading, ensure you have Python properly installed:</p>
+            <ol>
+              <li>Open Command Prompt and run: <code>python --version</code></li>
+              <li>If not installed, download from: 
+                <a href="https://www.python.org/downloads/release/python-3117/" target="_blank">python.org/downloads</a>
+              </li>
+              <li>During installation, <strong>ENABLE "Add Python to PATH"</strong></li>
+            </ol>
+            <div class="checkbox-container">
+              <label class="checkbox-label">
+                <input type="checkbox" class="requirement-checkbox" data-step="1">
+                <span class="checkmark"></span>
+                I have Python installed and added to PATH
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="step" id="step2" style="display: none;">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <h3>Unzip the File</h3>
+          </div>
+          <div class="step-content">
+            <p>After downloading:</p>
+            <ol>
+              <li>Right-click the downloaded ZIP file</li>
+              <li>Select "Extract All"</li>
+              <li>Choose a destination folder</li>
+            </ol>
+            <div class="checkbox-container">
+              <label class="checkbox-label">
+                <input type="checkbox" class="requirement-checkbox" data-step="2">
+                <span class="checkmark"></span>
+                I understand how to unzip the file
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="step" id="step3" style="display: none;">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <h3>Run the Tool</h3>
+          </div>
+          <div class="step-content">
+            <p>To launch the tool:</p>
+            <ol>
+              <li>Run <code>install.bat</code> first</li>
+              <li>Then run <code>run.bat</code></li>
+              <li>Alternative: Run <code>main.py</code> manually (<a href="https://youtu.be/enfCPH_2k6A?si=BZCQgHI-Pnf5kvaV" target="_blank">tutorial</a>)</li>
+            </ol>
+            <div class="checkbox-container">
+              <label class="checkbox-label">
+                <input type="checkbox" class="requirement-checkbox" data-step="3">
+                <span class="checkmark"></span>
+                I understand how to run the tool
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="download-ready" id="downloadReady" style="display: none;">
+        <div class="ready-content">
+          <i class="fas fa-check-circle"></i>
+          <h3>All Requirements Met!</h3>
+          <p>You can now download the tool and follow the instructions above</p>
+          <a href="#" class="btn btn-primary" id="finalDownloadBtn">
+            <i class="fas fa-download"></i>
+            Download Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .download-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .download-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .overlay-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-xl);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-strong);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    position: relative;
+  }
+  
+  .download-overlay.active .overlay-content {
+    transform: translateY(0);
+  }
+  
+  .overlay-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 1;
+  }
+  
+  .overlay-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  
+  .close-overlay {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1;
+    padding: 0 0.5rem;
+  }
+  
+  .close-overlay:hover {
+    color: var(--accent-cyan);
+    transform: rotate(90deg);
+  }
+  
+  .overlay-body {
+    padding: 2rem;
+  }
+  
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .step {
+    background: var(--glass-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--glass-medium);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  
+  .step-number {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  
+  .step-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .step-content {
+    padding: 1.5rem;
+  }
+  
+  .step-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-content li {
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+  }
+  
+  .step-content code {
+    background: var(--glass-medium);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    color: var(--accent-cyan);
+  }
+  
+  .step-content a {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  
+  .step-content a:hover {
+    text-decoration: underline;
+  }
+  
+  .checkbox-container {
+    margin-top: 1.5rem;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-secondary);
+    transition: var(--transition);
+  }
+  
+  .checkbox-label:hover {
+    color: var(--text-primary);
+  }
+  
+  .checkbox-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .checkmark {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background: var(--glass-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+  
+  .checkbox-label:hover .checkmark {
+    background: var(--glass-strong);
+    border-color: var(--accent-cyan);
+  }
+  
+  .checkbox-label input:checked ~ .checkmark {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-color: transparent;
+  }
+  
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .checkbox-label input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  .download-ready {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--glass-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+  }
+  
+  .download-ready.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .download-ready i {
+    font-size: 4rem;
+    color: var(--accent-cyan);
+    margin-bottom: 1.5rem;
+  }
+  
+  .download-ready h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .download-ready p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .overlay-header {
+      padding: 1.5rem;
+    }
+    
+    .overlay-body {
+      padding: 1.5rem;
+    }
+    
+    .step-header {
+      padding: 1.2rem;
+    }
+    
+    .step-content {
+      padding: 1.2rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const downloadButtons = document.querySelectorAll('.btn-primary[href="#download"]');
+    const downloadOverlay = document.getElementById('downloadOverlay');
+    const closeOverlay = document.getElementById('closeOverlay');
+    const checkboxes = document.querySelectorAll('.requirement-checkbox');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const downloadReady = document.getElementById('downloadReady');
+    const finalDownloadBtn = document.getElementById('finalDownloadBtn');
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        downloadOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    closeOverlay.addEventListener('click', function() {
+      downloadOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    downloadOverlay.addEventListener('click', function(e) {
+      if (e.target === downloadOverlay) {
+        downloadOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const step = parseInt(this.dataset.step);
+        if (step === 1 && this.checked) {
+          step2.style.display = 'block';
+          setTimeout(() => {
+            step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 300);
+        } else if (step === 2 && this.checked) {
+          step3.style.display = 'block';
+          setTimeout(() => {
+            step3.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 300);
+        }
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        if (allChecked) {
+          downloadReady.style.display = 'block';
+          setTimeout(() => {
+            downloadReady.classList.add('active');
+            downloadReady.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        } else {
+          downloadReady.classList.remove('active');
+          setTimeout(() => {
+            if (!allChecked) downloadReady.style.display = 'none';
+          }, 300);
+        }
+      });
+    });
+finalDownloadBtn.addEventListener('click', function(e) {
+  e.preventDefault();
+  
+  downloadOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+
+  window.location.href = 'https://go6official.pythonanywhere.com/download';
+});
+
+  });
+</script>
+
+
+
+
+
+
+</body>
+</html>
